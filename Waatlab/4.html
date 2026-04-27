@@ -1,0 +1,35 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<meta charset="UTF-8"> 
+<title>Text Analysis</title> 
+</head> 
+<body> 
+<h1>Text Analysis Tool</h1> 
+<form id="textForm" onsubmit="analyzeText(event)"> 
+<label for="textInput">Enter your text below:</label><br><br> 
+<textarea id="textInput" rows="10" cols="50" 
+placeholder="Type or paste your text here..."></textarea><br><br> 
+<button type="submit">Submit</button> 
+</form> 
+ 
+<script> 
+function analyzeText(event) { 
+const text = document.getElementById("textInput").value; 
+ 
+// Count characters including spaces and newline 
+// const charCount = text.length; 
+// Count characters excluding spaces 
+const charCount = text.replace(/\s+/g, "").length; 
+ 
+// Count words (split by whitespace and filter out empty strings) 
+const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0; 
+// Count lines (split by newline and filter out empty strings) 
+const lineCount = text ? text.split(/\n/).length : 0; 
+ 
+// Display the results in an alert 
+alert(`Characters: ${charCount}\nWords: ${wordCount}\nLines: ${lineCount}`); 
+} 
+</script> 
+</body> 
+</html> 
