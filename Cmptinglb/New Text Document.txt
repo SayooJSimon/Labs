@@ -1,0 +1,387 @@
+Demonstrates how to simulate a Data Center with one host and run one Cloudlet on it using cloudsim. 
+Code Implementation: 
+ 
+package org.cloudbus.cloudsim.examples; 
+  
+import java.text.DecimalFormat; 
+import java.util.*; 
+import org.cloudbus.cloudsim.*; 
+import org.cloudbus.cloudsim.core.CloudSim; 
+import org.cloudbus.cloudsim.provisioners.*; 
+  
+public class CloudSimExample1 { 
+static List<Cloudlet> cl=new ArrayList<>(); 
+static List<Vm> vm=new ArrayList<>(); 
+  
+public static void main(String[] a){ 
+Log.printLine("Starting CloudSimExample1..."); 
+try{ 
+CloudSim.init(1,Calendar.getInstance(),false); 
+  
+Datacenter d=createDC("Datacenter_0"); 
+DatacenterBroker b=new DatacenterBroker("Broker"); 
+int id=b.getId(); 
+  
+vm.add(new Vm(0,id,1000,1,512,1000,10000,"Xen",new CloudletSchedulerTimeShared())); 
+b.submitVmList(vm); 
+  
+UtilizationModel u=new UtilizationModelFull(); 
+Cloudlet c=new Cloudlet(0,400000,1,300,300,u,u,u); 
+c.setUserId(id); c.setVmId(0); 
+  
+cl.add(c); 
+b.submitCloudletList(cl); 
+  
+CloudSim.startSimulation(); 
+CloudSim.stopSimulation(); 
+  
+print(b.getCloudletReceivedList()); 
+d.printDebts(); 
+  
+Log.printLine("CloudSimExample1 finished!"); 
+}catch(Exception e){e.printStackTrace();} 
+} 
+  
+static Datacenter createDC(String n){ 
+List<Pe> p=new ArrayList<>(); 
+p.add(new Pe(0,new PeProvisionerSimple(1000))); 
+  
+List<Host> h=new ArrayList<>(); 
+h.add(new Host(0,new RamProvisionerSimple(2048), 
+ 
+new BwProvisionerSimple(10000),1000000,p,new VmSchedulerTimeShared(p))); 
+  
+DatacenterCharacteristics c=new DatacenterCharacteristics( 
+"x86","Linux","Xen",h,10.0,3.0,0.05,0.001,0.0); 
+  
+try{ 
+return new Datacenter(n,c,new VmAllocationPolicySimple(h), 
+new LinkedList<Storage>(),0); 
+}catch(Exception e){return null;} 
+} 
+  
+static void print(List<Cloudlet> l){ 
+Log.printLine("\n========== OUTPUT =========="); 
+Log.printLine("Cloudlet ID    STATUS    Data center ID    VM ID    Time    Start Time    Finish 
+Time"); 
+DecimalFormat f=new DecimalFormat("###.##"); 
+  
+for(Cloudlet c:l) 
+if(c.getCloudletStatus()==Cloudlet.SUCCESS){ 
+Log.print("    "+c.getCloudletId()+"    SUCCESS"); 
+Log.printLine("        "+c.getResourceId() 
++"            "+c.getVmId() 
++"        "+f.format(c.getActualCPUTime()) 
++"        "+f.format(c.getExecStartTime()) 
++"        "+f.format(c.getFinishTime())); 
+} 
+} 
+} 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+4 Demonstrates how to create a datacenter with one host, two virtual machines and run two cloudlets on 
+it. Both virtual machine (vm1,vm2) has same machine configuration. 
+Code Implementation: 
+ 
+package org.cloudbus.cloudsim.examples; 
+  
+import java.text.DecimalFormat; 
+import java.util.*; 
+import org.cloudbus.cloudsim.*; 
+import org.cloudbus.cloudsim.core.CloudSim; 
+import org.cloudbus.cloudsim.provisioners.*; 
+  
+public class CloudSimExample2 { 
+static List<Cloudlet> cl=new ArrayList<>(); 
+static List<Vm> vm=new ArrayList<>(); 
+  
+public static void main(String[] a){ 
+Log.printLine("Starting CloudSimExample2..."); 
+try{ 
+CloudSim.init(1,Calendar.getInstance(),false); 
+  
+Datacenter d=createDC("Datacenter_0"); 
+DatacenterBroker b=new DatacenterBroker("Broker"); 
+int id=b.getId(); 
+  
+vm.add(new Vm(0,id,250,1,512,1000,10000,"Xen",new CloudletSchedulerTimeShared())); 
+vm.add(new Vm(1,id,250,1,512,1000,10000,"Xen",new CloudletSchedulerTimeShared())); 
+b.submitVmList(vm); 
+  
+UtilizationModel u=new UtilizationModelFull(); 
+Cloudlet c1=new Cloudlet(0,250000,1,300,300,u,u,u); 
+c1.setUserId(id); 
+Cloudlet c2=new Cloudlet(1,250000,1,300,300,u,u,u); 
+c2.setUserId(id); 
+cl.add(c1); cl.add(c2); 
+b.submitCloudletList(cl); 
+  
+b.bindCloudletToVm(0,0); 
+b.bindCloudletToVm(1,1); 
+  
+CloudSim.startSimulation(); 
+CloudSim.stopSimulation(); 
+  
+print(b.getCloudletReceivedList()); 
+d.printDebts(); 
+  
+Log.printLine("CloudSimExample2 finished!"); 
+}catch(Exception e){e.printStackTrace();} 
+} 
+  
+static Datacenter createDC(String n){ 
+ 
+List<Pe> p=new ArrayList<>(); 
+p.add(new Pe(0,new PeProvisionerSimple(1000))); 
+List<Host> h=new ArrayList<>(); 
+h.add(new Host(0,new RamProvisionerSimple(2048), 
+new BwProvisionerSimple(10000),1000000,p,new VmSchedulerTimeShared(p))); 
+  
+DatacenterCharacteristics c=new DatacenterCharacteristics( 
+"x86","Linux","Xen",h,10.0,3.0,0.05,0.001,0.0); 
+  
+try{return new Datacenter(n,c,new VmAllocationPolicySimple(h),new LinkedList<Storage>(),0);} 
+catch(Exception e){return null;} 
+} 
+  
+static void print(List<Cloudlet> l){ 
+Log.printLine("\n========== OUTPUT =========="); 
+Log.printLine("Cloudlet ID    STATUS    Data center ID    VM ID    Time    Start Time    Finish 
+Time"); 
+DecimalFormat f=new DecimalFormat("###.##"); 
+  
+for(Cloudlet c:l) 
+if(c.getCloudletStatus()==Cloudlet.SUCCESS){ 
+Log.print("    "+c.getCloudletId()+"    SUCCESS"); 
+Log.printLine("        "+c.getResourceId()+"            "+c.getVmId()+ 
+"        "+f.format(c.getActualCPUTime())+ 
+"        "+f.format(c.getExecStartTime())+ 
+"        "+f.format(c.getFinishTime())); 
+} 
+} 
+} 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+5 Demonstrates how to create a datacenter with two hosts, two virtual machines and run two cloudlets 
+on it. The cloudlets run in VMs with different MIPS requirements. The second VM will have twice the 
+priority of virtual machine one (VM1) and so cloudlet will receive twice CPU time to complete the 
+execution. 
+Code Implementation: 
+ 
+package org.cloudbus.cloudsim.examples; 
+  
+import java.text.DecimalFormat; 
+import java.util.*; 
+import org.cloudbus.cloudsim.*; 
+import org.cloudbus.cloudsim.core.CloudSim; 
+import org.cloudbus.cloudsim.provisioners.*; 
+  
+public class CloudSimExample3 { 
+static List<Cloudlet> cl=new ArrayList<>(); 
+static List<Vm> vm=new ArrayList<>(); 
+  
+public static void main(String[] a){ 
+Log.printLine("Starting CloudSimExample3..."); 
+try{ 
+CloudSim.init(1,Calendar.getInstance(),false); 
+  
+Datacenter d=createDC("Datacenter_0"); 
+DatacenterBroker b=new DatacenterBroker("Broker"); 
+int id=b.getId(); 
+  
+vm.add(new Vm(0,id,250,1,2048,1000,10000,"Xen",new CloudletSchedulerTimeShared())); 
+vm.add(new Vm(1,id,500,1,2048,1000,10000,"Xen",new CloudletSchedulerTimeShared())); 
+b.submitVmList(vm); 
+  
+UtilizationModel u=new UtilizationModelFull(); 
+Cloudlet c1=new Cloudlet(0,40000,1,300,300,u,u,u); 
+c1.setUserId(id); 
+Cloudlet c2=new Cloudlet(1,40000,1,300,300,u,u,u); 
+c2.setUserId(id); 
+cl.add(c1); cl.add(c2); 
+b.submitCloudletList(cl); 
+  
+b.bindCloudletToVm(0,0); 
+b.bindCloudletToVm(1,1); 
+  
+CloudSim.startSimulation(); 
+CloudSim.stopSimulation(); 
+  
+print(b.getCloudletReceivedList()); 
+d.printDebts(); 
+  
+Log.printLine("CloudSimExample3 finished!"); 
+}catch(Exception e){e.printStackTrace();} 
+ 
+} 
+  
+static Datacenter createDC(String n){ 
+List<Pe> p1=new ArrayList<>(); p1.add(new Pe(0,new PeProvisionerSimple(1000))); 
+List<Pe> p2=new ArrayList<>(); p2.add(new Pe(0,new PeProvisionerSimple(1000))); 
+  
+List<Host> h=new ArrayList<>(); 
+h.add(new Host(0,new RamProvisionerSimple(2048),new 
+BwProvisionerSimple(10000),1000000,p1,new VmSchedulerTimeShared(p1))); 
+h.add(new Host(1,new RamProvisionerSimple(2048),new 
+BwProvisionerSimple(10000),1000000,p2,new VmSchedulerTimeShared(p2))); 
+  
+DatacenterCharacteristics c=new DatacenterCharacteristics( 
+"x86","Linux","Xen",h,10.0,3.0,0.05,0.001,0.0); 
+  
+try{return new Datacenter(n,c,new VmAllocationPolicySimple(h),new LinkedList<Storage>(),0);} 
+catch(Exception e){return null;} 
+} 
+  
+static void print(List<Cloudlet> l){ 
+Log.printLine("\n========== OUTPUT =========="); 
+Log.printLine("Cloudlet ID    STATUS    Data center ID    VM ID    Time    Start Time    Finish 
+Time"); 
+DecimalFormat f=new DecimalFormat("###.##"); 
+for(Cloudlet c:l) 
+if(c.getCloudletStatus()==Cloudlet.SUCCESS){ 
+Log.print("    "+c.getCloudletId()+"    SUCCESS"); 
+Log.printLine("        "+c.getResourceId()+"            "+c.getVmId()+ 
+"        "+f.format(c.getActualCPUTime())+ 
+"        "+f.format(c.getExecStartTime())+ 
+"        "+f.format(c.getFinishTime())); 
+} 
+} 
+} 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+6 Demonstrate how to create two datacenters with one host each and run two cloudlets on them. 
+Code Implementation: 
+ 
+package org.cloudbus.cloudsim.examples; 
+  
+import java.text.DecimalFormat; 
+import java.util.*; 
+import org.cloudbus.cloudsim.*; 
+import org.cloudbus.cloudsim.core.CloudSim; 
+import org.cloudbus.cloudsim.provisioners.*; 
+  
+public class CloudSimExample4 { 
+static List<Cloudlet> cl=new ArrayList<>(); 
+static List<Vm> vm=new ArrayList<>(); 
+  
+public static void main(String[] a){ 
+Log.printLine("Starting CloudSimExample4..."); 
+try{ 
+CloudSim.init(1,Calendar.getInstance(),false); 
+  
+Datacenter d0=createDC("Datacenter_0"); 
+Datacenter d1=createDC("Datacenter_1"); 
+DatacenterBroker b=new DatacenterBroker("Broker"); 
+int id=b.getId(); 
+  
+vm.add(new Vm(0,id,250,1,512,1000,10000,"Xen",new CloudletSchedulerTimeShared())); 
+vm.add(new Vm(1,id,250,1,512,1000,10000,"Xen",new CloudletSchedulerTimeShared())); 
+b.submitVmList(vm); 
+  
+UtilizationModel u=new UtilizationModelFull(); 
+Cloudlet c1=new Cloudlet(0,40000,1,300,300,u,u,u); c1.setUserId(id); 
+Cloudlet c2=new Cloudlet(1,40000,1,300,300,u,u,u); c2.setUserId(id); 
+cl.add(c1); cl.add(c2); 
+b.submitCloudletList(cl); 
+  
+b.bindCloudletToVm(0,0); 
+b.bindCloudletToVm(1,1); 
+  
+CloudSim.startSimulation(); 
+CloudSim.stopSimulation(); 
+  
+print(b.getCloudletReceivedList()); 
+d0.printDebts(); 
+d1.printDebts(); 
+  
+Log.printLine("CloudSimExample4 finished!"); 
+}catch(Exception e){e.printStackTrace();} 
+} 
+  
+ 
+static Datacenter createDC(String n){ 
+List<Pe> p=new ArrayList<>(); p.add(new Pe(0,new PeProvisionerSimple(1000))); 
+List<Host> h=new ArrayList<>(); 
+h.add(new Host(0,new RamProvisionerSimple(2048),new 
+BwProvisionerSimple(10000),1000000,p,new VmSchedulerSpaceShared(p))); 
+DatacenterCharacteristics c=new DatacenterCharacteristics( 
+"x86","Linux","Xen",h,10.0,3.0,0.05,0.001,0.0); 
+try{return new Datacenter(n,c,new VmAllocationPolicySimple(h),new LinkedList<Storage>(),0);} 
+catch(Exception e){return null;} 
+} 
+  
+static void print(List<Cloudlet> l){ 
+Log.printLine("\n========== OUTPUT =========="); 
+Log.printLine("Cloudlet ID    STATUS    Data center ID    VM ID    Time    Start Time    Finish 
+Time"); 
+DecimalFormat f=new DecimalFormat("###.##"); 
+for(Cloudlet c:l) 
+if(c.getCloudletStatus()==Cloudlet.SUCCESS){ 
+Log.print("    "+c.getCloudletId()+"    SUCCESS"); 
+Log.printLine("        "+c.getResourceId()+"            "+c.getVmId()+ 
+"        "+f.format(c.getActualCPUTime())+ 
+"        "+f.format(c.getExecStartTime())+ 
+"        "+f.format(c.getFinishTime())); 
+} 
+} 
+}
