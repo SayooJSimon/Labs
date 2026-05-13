@@ -1,3 +1,176 @@
+from Crypto.Cipher import DES
+from Crypto.Util.Padding import pad,unpad
+import binascii
+
+k=b'12345678'; d=b'naveen'
+
+c=DES.new(k,DES.MODE_CBC)
+e=c.encrypt(pad(d,8))
+
+print("Encrypted Data:",binascii.hexlify(e).decode())
+print("IV:",binascii.hexlify(c.iv).decode())
+
+c=DES.new(k,DES.MODE_CBC,c.iv)
+print("Decrypted Data:",unpad(c.decrypt(e),8).decode())
+
+prog 2
+
+! pip install pycryptodome
+
+from math import gcd
+
+def RSA(p,q,m):
+    n=p*q
+    t=(p-1)*(q-1)
+
+    e=2
+    while gcd(e,t)!=1: e+=1
+
+    d=pow(e,-1,t)
+
+    c=pow(m,e,n)
+    print("Encrypted message is",c)
+
+    print("Decrypted message is",pow(c,d,n))
+
+RSA(3,7,9)
+RSA(3,7,17)
+
+
+prog3
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3>Diffie-Hellman Key Exchange</h3>
+
+<input id="a" placeholder="Enter Alice's private key">
+<button onclick="f()">Compute</button>
+
+<p id="r"></p>
+
+<script>
+function f(){
+    let p=23, g=5, b=6;
+    let a=parseInt(document.getElementById("a").value);
+
+    let A=1, B=1;
+
+    for(let i=0;i<a;i++) A=(A*g)%p;
+    for(let i=0;i<b;i++) B=(B*g)%p;
+
+    let k1=1, k2=1;
+
+    for(let i=0;i<a;i++) k1=(k1*B)%p;
+    for(let i=0;i<b;i++) k2=(k2*A)%p;
+
+    document.getElementById("r").innerHTML =
+    "Prime number (p): "+p+"<br>"+
+    "Primitive root (g): "+g+"<br>"+
+    "Alice's private key: "+a+"<br>"+
+    "Alice's public key: "+A+"<br>"+
+    "Bob's public key: "+B+"<br>"+
+    "Shared secret key (Alice): "+k1+"<br>"+
+    "Shared secret key (Bob): "+k2;
+}
+</script>
+
+</body>
+</html>
+
+
+prog 4 run in html
+
+import hashlib
+def hash_step(text, algo):
+    data = text.encode()
+    print("Step 1: Input in bytes:", data.hex())
+    if algo == "SHA-1":
+        h = hashlib.sha1()
+    else:
+        h = hashlib.sha512()
+    print("Step 2:", algo, "initialized")
+    h.update(data)
+    print("Step 3: Intermediate Hash:", h.hexdigest())
+    print("Step 4: Final Hash:", h.hexdigest())
+text = input("Enter text: ")
+algo = input("Enter algorithm (SHA-1 / SHA-512): ")
+hash_step(text, algo)
+
+prog 5 sha
+
+p=input("Enter the plain text: ")
+k=int(input("Enter the number of shifts: "))
+
+c="".join(chr((ord(i)-97+k)%26+97) if i.isalpha() else i for i in p.lower())
+d="".join(chr((ord(i)-97-k)%26+97) if i.isalpha() else i for i in c)
+
+print("Plaintext for caesar:",p)
+print("Shift:",k)
+print("Ciphertext from caesar:",c)
+print("Originaltext for caesar:",d)
+
+program 1 (a)Ceaser Cipher
+
+import string,random
+
+a=string.ascii_lowercase
+b=list(a); random.shuffle(b)
+k=dict(zip(a,b))
+rk={v:k for k,v in k.items()}
+
+p=input("Enter the plain text: ")
+
+c="".join(k.get(i,i) for i in p.lower())
+d="".join(rk.get(i,i) for i in c)
+
+print("Substitution Key:",k)
+print("Plaintext:",p)
+print("Ciphertext:",c)
+print("Decrypted Text:",d)
+
+program 1(b)Substitution Cipher
+
+Hill cipher 
+
+def mod_inv(a):
+    for i in range(26):
+        if (a*i) % 26 == 1:
+            return i
+
+def inv_key(k):
+    d = (k[0][0]*k[1][1] - k[0][1]*k[1][0]) % 26
+    di = mod_inv(d)
+    return [[ k[1][1]*di % 26, -k[0][1]*di % 26],
+            [-k[1][0]*di % 26,  k[0][0]*di % 26]]
+
+def process(text):
+    text = text.replace(" ", "").upper()
+    return text + ('X' if len(text) % 2 else '')
+
+def hill(text, k):
+    nums = [ord(c)-65 for c in text]
+    res = []
+    for i in range(0, len(nums), 2):
+        a, b = nums[i], nums[i+1]
+        res += [(k[0][0]*a + k[0][1]*b) % 26,
+                (k[1][0]*a + k[1][1]*b) % 26]
+    return ''.join(chr(n+65) for n in res)
+
+key = [[3, 3], [2, 5]]
+text = process(input("Enter text: "))
+
+enc = hill(text, key)
+dec = hill(enc, inv_key(key))
+
+print("Encrypted:", enc)
+print("Decrypted:", dec)
+
+program 1(b) hill cipher
+
+++++++++++++============Havana Oh na na==================++++++++++++++++++
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
